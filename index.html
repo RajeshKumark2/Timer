@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch & Timer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c0;
+            --secondary: #00cec9;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --danger: #d63031;
+            --success: #00b894;
+            --warning: #fdcb6e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--dark);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #777;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab.active {
+            color: var(--primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .display {
+            font-size: 4rem;
+            text-align: center;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .start-btn {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .stop-btn {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .reset-btn {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+
+        .timer-input {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .timer-input input {
+            width: 80px;
+            padding: 15px;
+            font-size: 1.2rem;
+            text-align: center;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .timer-input span {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
+        .laps {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+            padding-right: 10px;
+        }
+
+        .lap-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lap-number {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .display {
+                font-size: 3rem;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+            
+            button {
+                padding: 12px 20px;
+                flex: 1;
+                justify-content: center;
+            }
+            
+            .timer-input input {
+                width: 60px;
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-clock"></i> Stopwatch & Timer</h1>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('stopwatch')">Stopwatch</div>
+            <div class="tab" onclick="switchTab('timer')">Timer</div>
+        </div>
+        
+        <!-- Stopwatch Section -->
+        <div id="stopwatch-section">
+            <div class="display" id="stopwatch-display">00:00:00</div>
+            <div class="controls">
+                <button class="start-btn" onclick="startStopwatch()"><i class="fas fa-play"></i> Start</button>
+                <button class="stop-btn" onclick="stopStopwatch()"><i class="fas fa-stop"></i> Stop</button>
+                <button class="reset-btn" onclick="resetStopwatch()"><i class="fas fa-redo"></i> Reset</button>
+                <button onclick="lapStopwatch()"><i class="fas fa-flag"></i> Lap</button>
+            </div>
+            <div class="laps" id="stopwatch-laps"></div>
+        </div>
+        
+        <!-- Timer Section -->
+        <div id="timer-section" style="display: none;">
+            <div class="timer-input">
+                <input type="number" id="hours" min="0" max="23" value="0" placeholder="HH">
+                <span>:</span>
+                <input type="number" id="minutes" min="0" max="59" value="0" placeholder="MM">
+                <span>:</span>
+                <input type="number" id="seconds" min="0" max="59" value="0" placeholder="SS">
+            </div>
+            <div class="display" id="timer-display">00:00:00</div>
+            <div class="controls">
+                <button class="start-btn" onclick="startTimer()"><i class="fas fa-play"></i> Start</button>
+                <button class="stop-btn" onclick="stopTimer()"><i class="fas fa-stop"></i> Stop</button>
+                <button class="reset-btn" onclick="resetTimer()"><i class="fas fa-redo"></i> Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Stopwatch variables
+        let stopwatchInterval;
+        let stopwatchTime = 0;
+        let stopwatchRunning = false;
+        let lapCount = 1;
+
+        // Timer variables
+        let timerInterval;
+        let timerTime = 0;
+        let timerRunning = false;
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
+            
+            if (tab === 'stopwatch') {
+                document.getElementById('stopwatch-section').style.display = 'block';
+                document.getElementById('timer-section').style.display = 'none';
+            } else {
+                document.getElementById('stopwatch-section').style.display = 'none';
+                document.getElementById('timer-section').style.display = 'block';
+                updateTimerDisplay();
+            }
+        }
+
+        // Stopwatch functions
+        function startStopwatch() {
+            if (!stopwatchRunning) {
+                stopwatchInterval = setInterval(() => {
+                    stopwatchTime++;
+                    updateStopwatchDisplay();
+                }, 1000);
+                stopwatchRunning = true;
+            }
+        }
+
+        function stopStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchRunning = false;
+        }
+
+        function resetStopwatch() {
+            stopStopwatch();
+            stopwatchTime = 0;
+            lapCount = 1;
+            updateStopwatchDisplay();
+            document.getElementById('stopwatch-laps').innerHTML = '';
+        }
+
+        function lapStopwatch() {
+            if (stopwatchRunning) {
+                const lapsContainer = document.getElementById('stopwatch-laps');
+                const lapItem = document.createElement('div');
+                lapItem.className = 'lap-item';
+                lapItem.innerHTML = `
+                    <span class="lap-number">Lap ${lapCount}</span>
+                    <span>${formatTime(stopwatchTime)}</span>
+                `;
+                lapsContainer.prepend(lapItem);
+                lapCount++;
+            }
+        }
+
+        function updateStopwatchDisplay() {
+            document.getElementById('stopwatch-display').textContent = formatTime(stopwatchTime);
+        }
+
+        // Timer functions
+        function startTimer() {
+            if (!timerRunning) {
+                const hours = parseInt(document.getElementById('hours').value) || 0;
+                const minutes = parseInt(document.getElementById('minutes').value) || 0;
+                const seconds = parseInt(document.getElementById('seconds').value) || 0;
+                
+                timerTime = hours * 3600 + minutes * 60 + seconds;
+                
+                if (timerTime <= 0) return;
+                
+                timerInterval = setInterval(() => {
+                    if (timerTime <= 0) {
+                        stopTimer();
+                        alert("Timer finished!");
+                        return;
+                    }
+                    timerTime--;
+                    updateTimerDisplay();
+                }, 1000);
+                timerRunning = true;
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            document.getElementById('hours').value = 0;
+            document.getElementById('minutes').value = 0;
+            document.getElementById('seconds').value = 0;
+            timerTime = 0;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer-display').textContent = formatTime(timerTime);
+        }
+
+        // Helper function to format time
+        function formatTime(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            
+            return [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                seconds.toString().padStart(2, '0')
+            ].join(':');
+        }
+
+        // Initialize displays
+        updateStopwatchDisplay();
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
